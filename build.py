@@ -37,6 +37,7 @@
 import sys
 
 import errno, glob, json, os, re, subprocess, threading, codecs, functools
+from security import safe_command
 
 if sys.version_info[0] == 2:
   import httplib
@@ -333,7 +334,7 @@ class Gen_compressed(threading.Thread):
       for group in [[CLOSURE_COMPILER_NPM], dash_args]:
         args.extend(filter(lambda item: item, group))
 
-      proc = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+      proc = safe_command.run(subprocess.Popen, args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
       (stdout, stderr) = proc.communicate()
 
       # Build the JSON response.
@@ -577,7 +578,7 @@ if __name__ == "__main__":
 
     # Sanity check the local compiler
     test_args = [closure_compiler, os.path.join("build", "test_input.js")]
-    test_proc = subprocess.Popen(test_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+    test_proc = safe_command.run(subprocess.Popen, test_args, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
     (stdout, _) = test_proc.communicate()
     assert stdout.decode("utf-8") == read(os.path.join("build", "test_expect.js"))
 
